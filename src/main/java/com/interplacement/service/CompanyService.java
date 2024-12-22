@@ -108,13 +108,16 @@ public class CompanyService {
 	}
 
 	public CompanyResponse updateCompany(String id, CompanyRequest companyRequest) throws IOException {
+		
 		Company existingCompany = companyRepository.findById(id)
 				.orElseThrow(() -> new RuntimeException("Company not found"));
 
 		if (companyRequest.getProfileImageBase64() != null) {
 			if (existingCompany.getProfileImagePath() != null) {
+				
 				Path oldImagePath = Paths.get(uploadDir,
 						existingCompany.getProfileImagePath().replaceFirst("/images/", ""));
+				
 				File oldImageFile = oldImagePath.toFile();
 
 				if (oldImageFile.exists()) {
