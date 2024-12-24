@@ -1,6 +1,7 @@
 package com.interplacement.entity;
 
 import com.interplacement.enums.ProfileStatus;
+import com.interplacement.enums.Role;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -28,6 +29,8 @@ public class Admin {
 	@Enumerated(EnumType.STRING)
 	private ProfileStatus status;
 	
-//	private String role;//enum
+	@Enumerated(EnumType.STRING)
+	private Role role;
 
+	
 }

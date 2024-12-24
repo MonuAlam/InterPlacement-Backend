@@ -41,7 +41,7 @@ public class JobPostRequest {
 	private String address;
 	@NotBlank
 	private String interviewRounds;
-	@NotBlank
+	@NotNull
 	private JobType jobType;
 	@NotBlank
 	private String shift;

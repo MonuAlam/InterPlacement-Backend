@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import com.interplacement.enums.CourseBranches;
 import com.interplacement.enums.Courses;
 import com.interplacement.enums.ProfileStatus;
+import com.interplacement.enums.Role;
 import com.interplacement.enums.StudentGender;
 
 import jakarta.persistence.Entity;
@@ -53,4 +54,6 @@ public class Student {
 	@Enumerated(EnumType.STRING)
 	private ProfileStatus status;
 	
+	@Enumerated(EnumType.STRING)
+	private Role role;
 }

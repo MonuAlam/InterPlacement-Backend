@@ -6,4 +6,5 @@ import com.interplacement.entity.JobPost;
 
 public interface JobPostRepo extends JpaRepository<JobPost, String> {
 
+	JobPost findTopByOrderByIdDesc();
 }

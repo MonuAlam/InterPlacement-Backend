@@ -7,13 +7,16 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.interplacement.entity.Student;
 import com.interplacement.enums.ProfileStatus;
+import com.interplacement.enums.Role;
 import com.interplacement.repository.StudentRepo;
 import com.interplacement.request.StudentRequest;
 import com.interplacement.response.StudentResponse;
@@ -25,6 +28,8 @@ public class StudentService {
 
 	@Autowired
 	private StudentRepo studentRepo;
+	
+	private BCryptPasswordEncoder bCryptPasswordEncoder=new BCryptPasswordEncoder();
 
 	private final AtomicInteger COUNTER = new AtomicInteger(0);
 
@@ -44,6 +49,12 @@ public class StudentService {
 	}
 
 	public StudentResponse createStudent( StudentRequest request) throws IOException {
+		
+		Optional<Student> existStudent=studentRepo.findByEmail(request.getEmail());
+				
+		if(existStudent.isPresent()) {
+			throw new RuntimeException("Student Already Exist can't created");
+		}
 
 		Student student = toEntity(request);
 
@@ -70,11 +81,12 @@ public class StudentService {
 	private Student toEntity(StudentRequest request) {
 
 		return Student.builder().id(genrateCustomId()).name(request.getName()).email(request.getEmail())
-				.password(request.getPassword()).persuingYear(request.getPersuingYear()).geneder(request.getGeneder())
+				.password(bCryptPasswordEncoder.encode(request.getPassword())).persuingYear(request.getPersuingYear()).geneder(request.getGeneder())
 				.rollNumber(request.getRollNumber()).phone(request.getPhone()).course(request.getCourse())
 				.branch(request.getBranch()).year(request.getYear()).cgpa(request.getCgpa()).dob(request.getDob())
 				.address(request.getAddress())
 				.status(ProfileStatus.ACTIVE)
+				.role(Role.STUDENT)
 				.build();
 	}
 
@@ -166,7 +178,7 @@ public class StudentService {
 
 	private Student updateWithBuilder(Student student, StudentRequest request) {
 
-		return student.toBuilder().name(request.getName()).email(request.getEmail()).password(request.getPassword())
+		return student.toBuilder().name(request.getName()).email(request.getEmail()).password(bCryptPasswordEncoder.encode(request.getPassword()))
 				.persuingYear(request.getPersuingYear()).geneder(request.getGeneder()).phone(request.getPhone())
 				.rollNumber(request.getRollNumber()).course(request.getCourse()).branch(request.getBranch())
 				.year(request.getYear()).cgpa(request.getCgpa()).dob(request.getDob()).address(request.getAddress())

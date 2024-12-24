@@ -24,19 +24,18 @@ public class SecurityFilter {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http.csrf().disable()
-                .cors().disable()
-                .authorizeHttpRequests()
-                    .requestMatchers("/authentication").permitAll() 
-                    .anyRequest().authenticated()  
-                .and()
+        http.csrf().disable()
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/authentication").permitAll() 
+                        .anyRequest().authenticated() 
+                )
                 .exceptionHandling()
                     .authenticationEntryPoint(jwtAuthentication) 
                 .and()
                 .sessionManagement()
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS) 
                 .and()
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class) 
-                .build();
-    }
-}
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); 
+        return http.build();
+    }    
+   }

@@ -1,6 +1,5 @@
 package com.interplacement.util;
 
-import java.sql.JDBCType;
 
 import com.interplacement.entity.JobPost;
 import com.interplacement.response.JobPostResponse;

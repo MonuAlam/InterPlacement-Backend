@@ -1,12 +1,15 @@
 package com.interplacement.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.interplacement.entity.Admin;
 import com.interplacement.enums.ProfileStatus;
+import com.interplacement.enums.Role;
 import com.interplacement.repository.AdminRepo;
 import com.interplacement.request.AdminRequest;
 import com.interplacement.response.AdminResponse;
@@ -22,6 +25,8 @@ public class AdminService {
 	private AdminRepo adminRepo;
 
 	private final AtomicInteger COUNTER = new AtomicInteger(0);
+	
+	BCryptPasswordEncoder cryptPasswordEncoder=new BCryptPasswordEncoder();
 
 	@PostConstruct
 	private void InitializeCounter() {
@@ -37,6 +42,12 @@ public class AdminService {
 	}
 
 	public AdminResponse createAdmin(AdminRequest request) {
+		
+		Optional<Admin> existingAdmin=adminRepo.findByEmail(request.getEmail());
+		
+		if (existingAdmin.isPresent()) {
+			throw new RuntimeException("Admin Already Exist can't created");
+		}
 
 		Admin admin = toEntity(request);
 
@@ -45,8 +56,11 @@ public class AdminService {
 
 	private Admin toEntity(AdminRequest request) {
 
-		return Admin.builder().id(generateCustomId()).email(request.getEmail()).password(request.getPassword())
-				.status(ProfileStatus.ACTIVE).build();
+		return Admin.builder().id(generateCustomId()).email(request.getEmail())
+				.password(cryptPasswordEncoder.encode(request.getPassword()))
+				.status(ProfileStatus.ACTIVE)
+				.role(Role.ADMIN)
+				.build();
 
 	}
 

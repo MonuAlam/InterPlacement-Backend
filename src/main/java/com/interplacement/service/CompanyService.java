@@ -6,13 +6,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.interplacement.entity.Company;
 import com.interplacement.enums.ProfileStatus;
+import com.interplacement.enums.Role;
 import com.interplacement.repository.CompanyRepo;
 import com.interplacement.request.CompanyRequest;
 import com.interplacement.response.CompanyResponse;
@@ -25,6 +28,8 @@ public class CompanyService {
 
 	@Autowired
 	private CompanyRepo companyRepository;
+
+	private BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
 
 	@Value("${file.upload-dir:uploads/images/}")
 	private String uploadDir;
@@ -48,6 +53,14 @@ public class CompanyService {
 
 	public CompanyResponse saveCompany(CompanyRequest companyRequest) throws IOException {
 
+	Optional<Company> existingCompany=	companyRepository.findByEmail(companyRequest.getEmail());
+	
+	if(existingCompany.isPresent()) {
+		throw new RuntimeException("Company Allready exist con't created");
+	}
+
+	
+		System.out.println(existingCompany);
 		Company company = toEntity(companyRequest);
 
 		if (companyRequest.getProfileImageBase64() != null) {
@@ -73,8 +86,9 @@ public class CompanyService {
 
 	private Company toEntity(CompanyRequest request) {
 		return Company.builder().id(generateCustomId()).name(request.getName()).mobNumber(request.getMobNumber())
-				.email(request.getEmail()).password(request.getPassword()).address(request.getAddress())
-				.companyType(request.getCompanyType()).profileStatus(ProfileStatus.ACTIVE).build();
+				.email(request.getEmail()).password(bCryptPasswordEncoder.encode(request.getPassword()))
+				.address(request.getAddress()).companyType(request.getCompanyType()).profileStatus(ProfileStatus.ACTIVE)
+				.role(Role.COMPANY).build();
 
 	}
 
@@ -108,16 +122,16 @@ public class CompanyService {
 	}
 
 	public CompanyResponse updateCompany(String id, CompanyRequest companyRequest) throws IOException {
-		
+
 		Company existingCompany = companyRepository.findById(id)
 				.orElseThrow(() -> new RuntimeException("Company not found"));
 
 		if (companyRequest.getProfileImageBase64() != null) {
 			if (existingCompany.getProfileImagePath() != null) {
-				
+
 				Path oldImagePath = Paths.get(uploadDir,
 						existingCompany.getProfileImagePath().replaceFirst("/images/", ""));
-				
+
 				File oldImageFile = oldImagePath.toFile();
 
 				if (oldImageFile.exists()) {
@@ -148,8 +162,8 @@ public class CompanyService {
 
 	private Company updateWithBuilder(Company company, CompanyRequest request) {
 		return company.toBuilder().name(request.getName()).mobNumber(request.getMobNumber()).email(request.getEmail())
-				.address(request.getAddress()).password(request.getPassword()).companyType(request.getCompanyType())
-				.build();
+				.address(request.getAddress()).password(bCryptPasswordEncoder.encode(request.getPassword()))
+				.companyType(request.getCompanyType()).build();
 	}
 
 	public CompanyResponse updateStatus(String id, String status) {

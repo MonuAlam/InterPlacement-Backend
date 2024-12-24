@@ -23,6 +23,8 @@ public class StudentDtoMapper {
 				.address(student.getAddress())
 				.profileImagePath(student.getProfileImagePath())
 				.status(student.getStatus())
+				.role(student.getRole())
+				.rollNumber(student.getRollNumber())
 				.build();
 	}
 

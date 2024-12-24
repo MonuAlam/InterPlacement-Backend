@@ -1,5 +1,6 @@
 package com.interplacement.controller;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,39 +30,39 @@ public class JobPostController {
 	@Autowired
 	private JobPostService jobPostService;
 
-//	@PostMapping("/{companyId}")
-//	public JobPostResponse createJobPost(@PathVariable String companyId, @Valid @RequestBody JobPostRequest request) {
-//
-//		return jobPostService.createJobPost(companyId, request);
-//	}
-//
-//	@GetMapping("/{companyId}")
-//	public List<JobPostResponse> getAllJobPostByComp(@PathVariable String companyId) {
-//
-//		return jobPostService.getAllJobPostByComp(companyId);
-//	}
-//
-//	@GetMapping("/{id}")
-//	public JobPostResponse getJobPostById(@PathVariable String id) {
-//
-//		return jobPostService.getJobPostById(id);
-//	}
-//
-//	@PutMapping("/{id}")
-//	public JobPostResponse updateJobPost(@PathVariable String id, @Valid @RequestBody JobPostRequest request) {
-//
-//		return jobPostService.updateJobPost(id, request);
-//	}
-//
-//	@PatchMapping("/{id}/status")
-//	public JobPostResponse updateStatus(@PathVariable String id, @RequestParam String status) {
-//
-//		return jobPostService.updateStatus(id, status);
-//	}
-//	
-//	@DeleteMapping("/{id}")
-//	public JobPostResponse deleteJobPost(@PathVariable String id) {
-//		
-//		return jobPostService.deleteJobPost(id);
-//	}
+	@PostMapping("/{companyId}")
+	public JobPostResponse createJobPost(@PathVariable String companyId, @Valid @RequestBody JobPostRequest request) throws IOException {
+
+		return jobPostService.createJobPost(companyId, request);
+	}
+
+	@GetMapping("/{companyId}")
+	public List<JobPostResponse> getAllJobPostByComp(@PathVariable String companyId) {
+
+		return jobPostService.getAllJobPostByComp(companyId);
+	}
+
+	@GetMapping("/{id}")
+	public JobPostResponse getJobPostById(@PathVariable String id) {
+
+		return jobPostService.getJobPostById(id);
+	}
+
+	@PutMapping("/{id}")
+	public JobPostResponse updateJobPost(@PathVariable String id, @Valid @RequestBody JobPostRequest request) throws IOException {
+
+		return jobPostService.updateJobPost(id, request);
+	}
+
+	@PatchMapping("/{id}/status")
+	public JobPostResponse updateStatus(@PathVariable String id, @RequestParam String status) {
+
+		return jobPostService.updateStatus(id, status);
+	}
+	
+	@DeleteMapping("/{id}")
+	public JobPostResponse deleteJobPost(@PathVariable String id) {
+		
+		return jobPostService.deleteJobPost(id);
+	}
 }

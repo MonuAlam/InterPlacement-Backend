@@ -17,6 +17,7 @@ public class CompanyDtoMapper {
 				.companyType(company.getCompanyType())
 				.profileStatus(company.getProfileStatus())
 				.profileImagePath(company.getProfileImagePath())
+				.role(company.getRole())
 				.build();
 	}
 

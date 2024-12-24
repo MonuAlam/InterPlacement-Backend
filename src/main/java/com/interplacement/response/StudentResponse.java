@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import com.interplacement.enums.CourseBranches;
 import com.interplacement.enums.Courses;
 import com.interplacement.enums.ProfileStatus;
+import com.interplacement.enums.Role;
 import com.interplacement.enums.StudentGender;
 
 import lombok.Builder;
@@ -32,5 +33,5 @@ public class StudentResponse {
 	private String address;
 	private String profileImagePath;
 	private ProfileStatus status;
-
+	private Role role;
 }

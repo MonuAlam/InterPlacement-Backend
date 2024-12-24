@@ -1,6 +1,7 @@
 package com.interplacement.response;
 
 import com.interplacement.enums.ProfileStatus;
+import com.interplacement.enums.Role;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -15,5 +16,6 @@ public class AdminResponse {
 	private String email;
 	private String password;
 	private ProfileStatus status;
+	private Role role;
 
 }

@@ -12,6 +12,7 @@ public class AdminDtoMapper {
 				.email(admin.getEmail())
 				.password(admin.getPassword())
 				.status(admin.getStatus())
+				.role(admin.getRole())
 				.build();
 	}
 

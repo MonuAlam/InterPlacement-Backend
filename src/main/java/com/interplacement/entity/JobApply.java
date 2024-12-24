@@ -4,5 +4,6 @@ public class JobApply {
 	
 	private String id;
 	private String studentId;
+//	JobPostid
 
 }

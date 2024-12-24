@@ -1,56 +1,42 @@
 package com.interplacement.config;
 
+import com.interplacement.service.CustomUserDetailsService;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.stereotype.Component;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 
 @Configuration
 public class SpringSecurity {
 
+	private final CustomUserDetailsService customUserDetailsService;
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+	public SpringSecurity(CustomUserDetailsService customUserDetailsService) {
+		this.customUserDetailsService = customUserDetailsService;
+	}
 
-    @Bean
-    public UserDetailsService userDetailsService() {
-        UserDetails adminUser = User.builder()
-                .username("admin")
-                .password(passwordEncoder().encode("admin"))
-                .roles("ADMIN")
-                .build();
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
 
-        UserDetails companyUser = User.builder()
-                .username("company")
-                .password(passwordEncoder().encode("company"))
-                .roles("COMPANY")
-                .build();
+	@Bean(name = "jwtSecurityFilterChain")
+	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+		http.csrf().disable().authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+				.userDetailsService(customUserDetailsService);
+		return http.build();
+	}
 
-        UserDetails studentUser = User.builder()
-                .username("student")
-                .password(passwordEncoder().encode("student"))
-                .roles("STUDENT")
-                .build();
-
-        UserDetails superUser = User.builder()
-                .username("super")
-                .password(passwordEncoder().encode("super"))
-                .roles("SUPER")
-                .build();
-
-        return new InMemoryUserDetailsManager(adminUser, companyUser, studentUser, superUser);
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
-    }
+	@Bean
+	public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
+			throws Exception {
+		return authenticationConfiguration.getAuthenticationManager();
+	}
 }

@@ -1,6 +1,7 @@
 package com.interplacement.response;
 
 import com.interplacement.enums.ProfileStatus;
+import com.interplacement.enums.Role;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -20,6 +21,7 @@ public class CompanyResponse {
 	private ProfileStatus profileStatus;
     private String profileImagePath; 
 	private String companyType;
+	private Role role;
 
 
 }

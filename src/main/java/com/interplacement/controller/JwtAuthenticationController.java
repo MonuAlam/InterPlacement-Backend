@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.interplacement.authentication.JwtHelper;
 import com.interplacement.request.JwtAuthenticationRequest;
 import com.interplacement.response.JwtAuthenticationResponse;
+import com.interplacement.service.CustomUserDetailsService;
 
 import lombok.AllArgsConstructor;
 
@@ -23,7 +24,7 @@ import lombok.AllArgsConstructor;
 public class JwtAuthenticationController {
 	
 	@Autowired
-	private UserDetailsService userDetailsService;
+	private CustomUserDetailsService userDetailsService;
 
 	@Autowired
 	private AuthenticationManager authenticationManager;
@@ -32,35 +33,37 @@ public class JwtAuthenticationController {
 	private JwtHelper helper;
 	
 	
-	@PostMapping("/authentication")
-	public ResponseEntity<JwtAuthenticationResponse> login(@RequestBody JwtAuthenticationRequest request){
-	
-		this.doAuthenticate(request.getUsername(), request.getPassword());
-		
-		UserDetails userDetails=userDetailsService.loadUserByUsername(request.getUsername());
-		
-		String token=this.helper.generateToken(userDetails);
-		
-		JwtAuthenticationResponse response=JwtAuthenticationResponse.builder()
-				.jwtToken(token)
-				.username(userDetails.getUsername())
-				.build();
-		
-		return new ResponseEntity<>(response,HttpStatus.OK);
-				
-	}
-	
-	private void doAuthenticate(String username,String password) {
-		
-		UsernamePasswordAuthenticationToken authenticationToken= new UsernamePasswordAuthenticationToken(username, password);
-		
-		try {
-		
-			authenticationManager.authenticate(authenticationToken);
-		
-		} catch (BadCredentialsException e) {
+    @PostMapping("/authentication")
+    public ResponseEntity<JwtAuthenticationResponse> login(@RequestBody JwtAuthenticationRequest request) {
+        try {
+            this.doAuthenticate(request.getUsername(), request.getPassword());
 
-			throw new BadCredentialsException("Credentials Invalid");
-		}
-	}
+            UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
+
+            String token = this.helper.generateToken(userDetails);
+
+            JwtAuthenticationResponse response = JwtAuthenticationResponse.builder()
+                    .jwtToken(token)
+                    .username(userDetails.getUsername())
+                    .success(true)
+                    .message("Login Successfully")
+                    .build();
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (BadCredentialsException ex) {
+
+        	JwtAuthenticationResponse response = JwtAuthenticationResponse.builder()
+                    .success(false)
+                    .message("Invalid username or password")
+                    .build();
+
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    private void doAuthenticate(String username, String password) {
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
+
+        authenticationManager.authenticate(authenticationToken);
+    }
 }

@@ -26,15 +26,17 @@ public class StudentRequest {
 	private String password;
 	@NotBlank
 	private String persuingYear;
-	@NotBlank
+	
+	@NotNull
 	private StudentGender geneder;
+	
 	@NotBlank
 	private String rollNumber;
 	@NotBlank
 	private String phone;
-	@NotBlank
+	@NotNull
 	private Courses course;
-	@NotBlank
+	@NotNull
 	private CourseBranches branch;
 	@NotBlank
 	private String year;
