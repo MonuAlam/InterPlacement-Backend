@@ -12,6 +12,7 @@ public class NotificationDtoMapper {
 		.title(notification.getTitle())
 		.description(notification.getDescription())
 		.date(notification.getDate())
+		.status(notification.getStatus())
 		.build();
 	}
 

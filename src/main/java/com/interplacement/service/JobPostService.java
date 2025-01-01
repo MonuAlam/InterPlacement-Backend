@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -97,6 +98,7 @@ public class JobPostService {
 				.address(request.getAddress()).interviewRounds(request.getInterviewRounds())
 				.jobType(request.getJobType()).shift(request.getShift()).jobdescription(request.getJobdescription())
 				.dealLineFrom(request.getDealLineFrom()).dealLineTo(request.getDealLineTo())
+				.postedDate(LocalDate.now())
 				.compProfileImagePath(request.getCompProfileImagePath()).status(ProfileStatus.ACTIVE).build();
 	}
 
@@ -192,5 +194,11 @@ public class JobPostService {
 		jobPostRepo.delete(jobPost);
 
 		return JobPostDtoMapper.toResponseDto(jobPost);
+	}
+
+	public List<JobPostResponse> getAllJobPost() {
+
+
+		return jobPostRepo.findAll().stream().map(JobPostDtoMapper::toResponseDto).toList();
 	}
 }

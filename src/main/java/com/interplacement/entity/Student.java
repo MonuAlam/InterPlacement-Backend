@@ -2,8 +2,8 @@ package com.interplacement.entity;
 
 import java.time.LocalDate;
 
-import com.interplacement.enums.CourseBranches;
-import com.interplacement.enums.Courses;
+
+
 import com.interplacement.enums.ProfileStatus;
 import com.interplacement.enums.Role;
 import com.interplacement.enums.StudentGender;
@@ -28,6 +28,7 @@ public class Student {
 	
 	@Id
 	private String id;
+	private String collegeId;
 	private String name;
 	private String email;
 	private String password;
@@ -39,11 +40,11 @@ public class Student {
 	private String rollNumber;
 	private String phone;
 	
-	@Enumerated(EnumType.STRING)
-	private Courses course;
+
+	private String course;
 	
-	@Enumerated(EnumType.STRING)
-	private CourseBranches branch;
+
+	private String branch;
 	
 	private String year;
 	private Double cgpa;

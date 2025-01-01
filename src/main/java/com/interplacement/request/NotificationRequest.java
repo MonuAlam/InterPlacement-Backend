@@ -19,7 +19,4 @@ public class NotificationRequest {
 	@NotBlank
 	private String description;
 	
-	@FutureOrPresent
-	private LocalDate date;
-
 }

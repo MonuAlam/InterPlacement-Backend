@@ -34,7 +34,7 @@ public class Company {
 	private String profileImagePath;
 	
 	@Enumerated(EnumType.STRING)
-	private ProfileStatus profileStatus;
+	private ProfileStatus status;
 	
 	@Enumerated(EnumType.STRING)
 	private Role role;

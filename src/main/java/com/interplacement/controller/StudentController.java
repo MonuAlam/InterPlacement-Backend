@@ -30,11 +30,18 @@ public class StudentController {
 	@Autowired
 	private StudentService studentService;
 	
-	@PostMapping
-	public StudentResponse createStudent(@Valid @RequestBody StudentRequest request) throws IOException {
+	@PostMapping("/{collegeId}")
+	public StudentResponse createStudent(@PathVariable String collegeId,@Valid @RequestBody StudentRequest request) throws IOException {
 		
-		return studentService.createStudent(request);
+		return studentService.createStudent(collegeId,request);
 	}
+	
+	@PostMapping("/register")
+	public StudentResponse registerStudent(@Valid @RequestBody StudentRequest request) throws IOException {
+		
+		return studentService.registerStudent(request);
+	}
+	
 	
 	@GetMapping
 	public List<StudentResponse> getAllStudent() {

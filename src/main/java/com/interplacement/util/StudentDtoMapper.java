@@ -9,6 +9,7 @@ public class StudentDtoMapper {
 		
 		return StudentResponse.builder()
 				.id(student.getId())
+				.collegeId(student.getCollegeId())
 				.name(student.getName())
 				.email(student.getEmail())
 				.password(student.getPassword())

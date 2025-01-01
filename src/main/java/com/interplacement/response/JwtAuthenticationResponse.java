@@ -1,5 +1,6 @@
 package com.interplacement.response;
 
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,4 +18,5 @@ public class JwtAuthenticationResponse {
 	private Boolean success;
 	private String jwtToken;
 	private String message;
+    private List<String> roles; // Ensure this field is present and is a List<String>
 }

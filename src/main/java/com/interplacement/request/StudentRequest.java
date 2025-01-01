@@ -2,8 +2,6 @@ package com.interplacement.request;
 
 import java.time.LocalDate;
 
-import com.interplacement.enums.CourseBranches;
-import com.interplacement.enums.Courses;
 import com.interplacement.enums.StudentGender;
 
 import jakarta.validation.constraints.NotBlank;
@@ -20,9 +18,12 @@ public class StudentRequest {
 
 	@NotBlank
 	private String name;
+	
+	private String collegeId;
+	
 	@NotBlank
 	private String email;
-	@NotBlank
+
 	private String password;
 	@NotBlank
 	private String persuingYear;
@@ -35,9 +36,9 @@ public class StudentRequest {
 	@NotBlank
 	private String phone;
 	@NotNull
-	private Courses course;
+	private String course;
 	@NotNull
-	private CourseBranches branch;
+	private String branch;
 	@NotBlank
 	private String year;
 	@NotNull

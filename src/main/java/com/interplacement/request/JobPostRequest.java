@@ -51,7 +51,6 @@ public class JobPostRequest {
 	private LocalDate dealLineFrom;
 	@FutureOrPresent
 	private LocalDate dealLineTo;
-
 	@NotBlank
 	private String compProfileImagePath;
 	private String profileImageBase64;

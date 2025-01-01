@@ -29,6 +29,7 @@ public class JobPostDtoMapper {
 				.jobdescription(jobPost.getJobdescription())
 				.dealLineFrom(jobPost.getDealLineFrom())
 				.dealLineTo(jobPost.getDealLineTo())
+				.postedDate(jobPost.getPostedDate())
 				.compProfileImagePath(jobPost.getCompProfileImagePath())
 				.status(jobPost.getStatus())
 				.build();

@@ -47,7 +47,13 @@ public class JobPostController {
 
 		return jobPostService.getJobPostById(id);
 	}
+	
+	@GetMapping
+	public List<JobPostResponse> getAllJobPost() {
 
+		return jobPostService.getAllJobPost();
+	}
+	
 	@PutMapping("/{id}")
 	public JobPostResponse updateJobPost(@PathVariable String id, @Valid @RequestBody JobPostRequest request) throws IOException {
 

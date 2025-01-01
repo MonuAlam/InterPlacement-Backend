@@ -60,7 +60,7 @@ public class CompanyService {
 	}
 
 	
-		System.out.println(existingCompany);
+		//System.out.println(existingCompany);
 		Company company = toEntity(companyRequest);
 
 		if (companyRequest.getProfileImageBase64() != null) {
@@ -87,7 +87,8 @@ public class CompanyService {
 	private Company toEntity(CompanyRequest request) {
 		return Company.builder().id(generateCustomId()).name(request.getName()).mobNumber(request.getMobNumber())
 				.email(request.getEmail()).password(bCryptPasswordEncoder.encode(request.getPassword()))
-				.address(request.getAddress()).companyType(request.getCompanyType()).profileStatus(ProfileStatus.ACTIVE)
+				.address(request.getAddress()).companyType(request.getCompanyType())
+				.status(ProfileStatus.ACTIVE)
 				.role(Role.COMPANY).build();
 
 	}
@@ -178,7 +179,7 @@ public class CompanyService {
 			throw new RuntimeException("Invalid Status Value");
 		}
 
-		company.setProfileStatus(newStatus);
+		company.setStatus(newStatus);
 
 		companyRepository.save(company);
 

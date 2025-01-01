@@ -18,7 +18,7 @@ public class CompanyResponse {
 	private String email;
 	private String address;
 	private String password;
-	private ProfileStatus profileStatus;
+	private ProfileStatus status;
     private String profileImagePath; 
 	private String companyType;
 	private Role role;

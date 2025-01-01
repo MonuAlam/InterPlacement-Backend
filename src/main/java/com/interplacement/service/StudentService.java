@@ -14,9 +14,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import com.interplacement.common.GenerateRandomPassword;
+import com.interplacement.entity.Admin;
 import com.interplacement.entity.Student;
 import com.interplacement.enums.ProfileStatus;
 import com.interplacement.enums.Role;
+import com.interplacement.repository.AdminRepo;
 import com.interplacement.repository.StudentRepo;
 import com.interplacement.request.StudentRequest;
 import com.interplacement.response.StudentResponse;
@@ -28,8 +32,14 @@ public class StudentService {
 
 	@Autowired
 	private StudentRepo studentRepo;
-	
-	private BCryptPasswordEncoder bCryptPasswordEncoder=new BCryptPasswordEncoder();
+
+	@Autowired
+	private AdminRepo adminRepo;
+
+	@Autowired
+	private EmailService emailService;
+
+	private BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
 
 	private final AtomicInteger COUNTER = new AtomicInteger(0);
 
@@ -48,15 +58,25 @@ public class StudentService {
 		COUNTER.set(lastId);
 	}
 
-	public StudentResponse createStudent( StudentRequest request) throws IOException {
-		
-		Optional<Student> existStudent=studentRepo.findByEmail(request.getEmail());
-				
-		if(existStudent.isPresent()) {
+	public StudentResponse createStudent(String collegeId, StudentRequest request) throws IOException {
+
+		Admin admin = adminRepo.findById(collegeId)
+				.orElseThrow(() -> new RuntimeException("College not found for collegeId" + collegeId));
+
+		if (admin.getStatus() != ProfileStatus.ACTIVE) {
+			throw new RuntimeException("College InActive");
+		}
+
+		Optional<Student> existStudent = studentRepo.findByEmail(request.getEmail());
+
+		if (existStudent.isPresent()) {
 			throw new RuntimeException("Student Already Exist can't created");
 		}
 
-		Student student = toEntity(request);
+	    String randomPassword =GenerateRandomPassword.generateRandomPassword(8);
+
+		
+		Student student = toEntity(collegeId, request,randomPassword);
 
 		if (request.getProfileImageBase64() != null) {
 
@@ -75,19 +95,80 @@ public class StudentService {
 
 			student.setProfileImagePath("/images/" + fileName);
 		}
-		return StudentDtoMapper.toResponseDto(studentRepo.save(student));
+
+	    Student savedStudent = studentRepo.save(student);
+
+		
+	    emailService.sendStudentPasswordEmail(savedStudent.getEmail(), savedStudent.getName(), randomPassword);
+
+		
+		return StudentDtoMapper.toResponseDto(savedStudent);
 	}
 
-	private Student toEntity(StudentRequest request) {
+	private Student toEntity(String collegeId, StudentRequest request,String randomPassword) {
 
-		return Student.builder().id(genrateCustomId()).name(request.getName()).email(request.getEmail())
-				.password(bCryptPasswordEncoder.encode(request.getPassword())).persuingYear(request.getPersuingYear()).geneder(request.getGeneder())
+		return Student.builder().id(genrateCustomId()).collegeId(collegeId).name(request.getName())
+				.email(request.getEmail())
+				.password(bCryptPasswordEncoder.encode(randomPassword))
+				.persuingYear(request.getPersuingYear()).geneder(request.getGeneder())
 				.rollNumber(request.getRollNumber()).phone(request.getPhone()).course(request.getCourse())
 				.branch(request.getBranch()).year(request.getYear()).cgpa(request.getCgpa()).dob(request.getDob())
-				.address(request.getAddress())
-				.status(ProfileStatus.ACTIVE)
-				.role(Role.STUDENT)
-				.build();
+				.address(request.getAddress()).status(ProfileStatus.ACTIVE).role(Role.STUDENT).build();
+	}
+
+	public StudentResponse registerStudent(StudentRequest request) throws IOException {
+
+		if (request.getCollegeId() == null) {
+			throw new RuntimeException("collegeId required");
+		}
+
+		Admin admin = adminRepo.findById(request.getCollegeId())
+				.orElseThrow(() -> new RuntimeException("College not found for collegeId" + request.getCollegeId()));
+		if (admin.getStatus() != ProfileStatus.ACTIVE) {
+			throw new RuntimeException("College InActive");
+		}
+
+		Optional<Student> existStudent = studentRepo.findByEmail(request.getEmail());
+
+		if (existStudent.isPresent()) {
+			throw new RuntimeException("Student Already Exist can't created");
+		}
+
+		Student student = toEntityReg(request);
+
+		if (request.getProfileImageBase64() != null) {
+
+			byte[] decodedImage = Base64.getDecoder().decode(request.getProfileImageBase64());
+
+			File uploadDirectory = new File(uploadDir);
+			if (!uploadDirectory.exists()) {
+				uploadDirectory.mkdirs();
+			}
+
+			String fileName = System.currentTimeMillis() + "_" + request.getProfileImageName();
+
+			Path filePath = Paths.get(uploadDir, fileName);
+
+			Files.write(filePath, decodedImage);
+
+			student.setProfileImagePath("/images/" + fileName);
+		}
+
+		Student savedStudent = studentRepo.save(student);
+
+		emailService.sendWelcomeEmail(savedStudent.getEmail(), savedStudent.getName());
+
+		return StudentDtoMapper.toResponseDto(savedStudent);
+	}
+
+	private Student toEntityReg(StudentRequest request) {
+
+		return Student.builder().id(genrateCustomId()).collegeId(request.getCollegeId()).name(request.getName())
+				.email(request.getEmail()).password(bCryptPasswordEncoder.encode(request.getPassword()))
+				.persuingYear(request.getPersuingYear()).geneder(request.getGeneder())
+				.rollNumber(request.getRollNumber()).phone(request.getPhone()).course(request.getCourse())
+				.branch(request.getBranch()).year(request.getYear()).cgpa(request.getCgpa()).dob(request.getDob())
+				.address(request.getAddress()).status(ProfileStatus.INACTIVE).role(Role.STUDENT).build();
 	}
 
 	private String genrateCustomId() {
@@ -138,50 +219,49 @@ public class StudentService {
 
 	public StudentResponse updateStudent(String id, StudentRequest request) throws IOException {
 
-		Student student = studentRepo.findById(id)
-				.orElseThrow(() -> new RuntimeException("Student not found"));
-		
-		if(request.getProfileImageBase64()!=null) {
-			
-			if(student.getProfileImagePath()!=null) {
-				
-				Path oldImagePath=Paths.get(uploadDir,student.getProfileImagePath().replaceFirst("/images/", ""));
-				
-				File oldImageFile=oldImagePath.toFile();
-				
-				if(oldImageFile.exists()) {
+		Student student = studentRepo.findById(id).orElseThrow(() -> new RuntimeException("Student not found"));
+
+		if (request.getProfileImageBase64() != null) {
+
+			if (student.getProfileImagePath() != null) {
+
+				Path oldImagePath = Paths.get(uploadDir, student.getProfileImagePath().replaceFirst("/images/", ""));
+
+				File oldImageFile = oldImagePath.toFile();
+
+				if (oldImageFile.exists()) {
 					oldImageFile.delete();
-				}	
+				}
 			}
-			
-			byte[] decodeImage=Base64.getDecoder().decode(request.getProfileImageBase64());
-			
-			File uploadDirectory=new File(uploadDir);
-			
-			if(!uploadDirectory.exists()) {
+
+			byte[] decodeImage = Base64.getDecoder().decode(request.getProfileImageBase64());
+
+			File uploadDirectory = new File(uploadDir);
+
+			if (!uploadDirectory.exists()) {
 				uploadDirectory.mkdirs();
 			}
-			
-			String fileName=System.currentTimeMillis()+"_"+request.getProfileImageName();
-			
-			Path filePath=Paths.get(uploadDir,fileName);
-			
+
+			String fileName = System.currentTimeMillis() + "_" + request.getProfileImageName();
+
+			Path filePath = Paths.get(uploadDir, fileName);
+
 			Files.write(filePath, decodeImage);
-			
-			student.setProfileImagePath("/images/"+fileName);
-			
+
+			student.setProfileImagePath("/images/" + fileName);
+
 		}
-		 Student updatedStudent=updateWithBuilder(student, request);
+		Student updatedStudent = updateWithBuilder(student, request);
 
 		return StudentDtoMapper.toResponseDto(studentRepo.save(updatedStudent));
 	}
 
 	private Student updateWithBuilder(Student student, StudentRequest request) {
 
-		return student.toBuilder().name(request.getName()).email(request.getEmail()).password(bCryptPasswordEncoder.encode(request.getPassword()))
-				.persuingYear(request.getPersuingYear()).geneder(request.getGeneder()).phone(request.getPhone())
-				.rollNumber(request.getRollNumber()).course(request.getCourse()).branch(request.getBranch())
-				.year(request.getYear()).cgpa(request.getCgpa()).dob(request.getDob()).address(request.getAddress())
-				.build();
+		return student.toBuilder().name(request.getName()).email(request.getEmail())
+				.password(bCryptPasswordEncoder.encode(request.getPassword())).persuingYear(request.getPersuingYear())
+				.geneder(request.getGeneder()).phone(request.getPhone()).rollNumber(request.getRollNumber())
+				.course(request.getCourse()).branch(request.getBranch()).year(request.getYear()).cgpa(request.getCgpa())
+				.dob(request.getDob()).address(request.getAddress()).build();
 	}
 }

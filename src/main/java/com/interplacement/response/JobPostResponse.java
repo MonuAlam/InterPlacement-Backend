@@ -34,6 +34,7 @@ public class JobPostResponse {
 	private String jobdescription;
 	private LocalDate dealLineFrom;
 	private LocalDate dealLineTo;
+	private LocalDate postedDate;
 	private String compProfileImagePath;
 	private ProfileStatus status;
 
